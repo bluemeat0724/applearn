@@ -20,3 +20,6 @@ config.py文件（基本配置信息设置，支撑开发生产模式配置切�
 3.配置redis缓存数据库
 4.配置session,解决flask讲session放在浏览器cookie中的问题，而是放在redis
 5.配置CFRF防护机制
+
+
+静态文件接口

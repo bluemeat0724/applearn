@@ -3,6 +3,7 @@ function getCookie(name) {
     return r ? r[1] : undefined;
 }
 
+//保存图片验证码编号
 var imageCodeId = "";
 
 function generateUUID() {
@@ -19,6 +20,12 @@ function generateUUID() {
 }
 
 function generateImageCode() {
+    //形成图片验证码的后端链接地址，设置到页面中让浏览器请求验证码图片
+    //1.生成图片验证码编号
+    imageCodeId=generateUUID();
+    //设置图片url
+    var url = "/api/v1.0/image_codes/"+ imageCodeId
+    $(".image-code img").attr("src",url);
 }
 
 function sendSMSCode() {
@@ -83,20 +90,20 @@ $(document).ready(function() {
     });
     $(".form-register").submit(function(e){
         e.preventDefault();
-        mobile = $("#mobile").val();
-        phoneCode = $("#phonecode").val();
-        passwd = $("#password").val();
-        passwd2 = $("#password2").val();
+        var mobile = $("#mobile").val();
+        // var phoneCode = $("#phonecode").val();
+        var passwd = $("#password").val();
+        var passwd2 = $("#password2").val();
         if (!mobile) {
             $("#mobile-err span").html("请填写正确的手机号！");
             $("#mobile-err").show();
             return;
         } 
-        if (!phoneCode) {
-            $("#phone-code-err span").html("请填写短信验证码！");
-            $("#phone-code-err").show();
-            return;
-        }
+        // if (!phoneCode) {
+        //     $("#phone-code-err span").html("请填写短信验证码！");
+        //     $("#phone-code-err").show();
+        //     return;
+        // }
         if (!passwd) {
             $("#password-err span").html("请填写密码!");
             $("#password-err").show();
@@ -107,5 +114,30 @@ $(document).ready(function() {
             $("#password2-err").show();
             return;
         }
+        //调用ajax向后端发送请求
+        var req_data = {
+            mobile : mobile,
+            imageCodeId: imageCodeId,
+            password: passwd,
+            password2:passwd2
+        }
+        var req_json = JSON.stringify(req_data);
+        $.ajax({
+            url: "api/v1.0/users",
+            type:"post",
+            data: req_json,
+            contentType:"application/json",
+            dataType:"json",
+            heardrs:{
+                "X-CSRFToken":getCookie("csrf_token")
+            },
+            success: function (resp) {
+                if (resp.errno == "0") {
+                    location.href = "/index.html";
+                } else{
+                    alert(resp.errmsq);
+                }
+            }
+        })
     });
 })
